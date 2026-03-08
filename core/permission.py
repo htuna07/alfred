@@ -2,25 +2,25 @@ from enum import Enum
 
 
 class Permission(str, Enum):
-    ALLOW = "allow"   # Her zaman izin ver
-    ASK   = "ask"     # Her seferinde kullanıcıya sor
-    DENY  = "deny"    # Her zaman reddet
+    ALLOW = "allow"   # Always allow
+    ASK   = "ask"     # Ask the user each time
+    DENY  = "deny"    # Always deny
 
 
 class PermissionManager:
 
     def __init__(self, defaults: dict[str, Permission] = None):
-        # Tool adı → Permission
+        # Tool name → Permission
         self._permissions: dict[str, Permission] = defaults or {}
 
     def set(self, tool_name: str, permission: Permission):
         self._permissions[tool_name] = permission
-        print(f"[izin] '{tool_name}' → {permission.value}")
+        print(f"[permission] '{tool_name}' → {permission.value}")
 
     def check(self, tool_name: str) -> bool:
         """
-        True  → tool çalışabilir
-        False → tool engellendi
+        True  → tool can run
+        False → tool blocked
         """
         state = self._permissions.get(tool_name, Permission.ASK)
 
@@ -28,27 +28,27 @@ class PermissionManager:
             return True
 
         if state == Permission.DENY:
-            print(f"[izin] '{tool_name}' engellendi.")
+            print(f"[permission] '{tool_name}' was denied.")
             return False
 
         if state == Permission.ASK:
             return self._ask_user(tool_name)
 
     def _ask_user(self, tool_name: str) -> bool:
-        print(f"\n[izin gerekli] '{tool_name}' çalıştırılsın mı?")
-        print("  e        → evet, bir kere")
-        print("  h        → hayır")
-        print("  her zaman → bundan sonra izin isteme")
-        print("  asla      → bundan sonra hep reddet")
+        print(f"\n[permission required] Run '{tool_name}'?")
+        print("  e        → yes, once")
+        print("  h        → no")
+        print("  always   → don't ask for this again")
+        print("  never    → always deny from now on")
 
-        answer = input("Cevap: ").strip().lower()
+        answer = input("Answer: ").strip().lower()
 
         if answer == "e":
             return True
-        elif answer == "her zaman":
+        elif answer == "always":
             self.set(tool_name, Permission.ALLOW)
             return True
-        elif answer == "asla":
+        elif answer == "never":
             self.set(tool_name, Permission.DENY)
             return False
         else:

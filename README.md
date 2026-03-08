@@ -1,8 +1,8 @@
 # P.R.I.M.E (Pi Robotic Intelligence & Monitoring Engine)
 
-Raspberry Pi üzerinde çalışan kişisel agent.
+A personal agent designed to run on a Raspberry Pi.
 
-## Kurulum
+## Installation
 
 ```bash
 pip3 install -r requirements.txt
@@ -10,69 +10,69 @@ export ANTHROPIC_API_KEY="sk-..."
 python3 main.py
 ```
 
-## Yeni Tool Eklemek
+## Adding a New Tool
 
-`tools/` altına yeni bir dosya oluştur:
+Create a new file under `tools/`:
 
 ```python
 from core.tool import Tool
 
-class YeniSensorTool(Tool):
-    name                = "yeni_sensor"
-    description         = "LLM bunu okur — ne yaptığını açıkla."
-    requires_permission = True          # False → izin sormaz
+class NewSensorTool(Tool):
+    name                = "new_sensor"
+    description         = "Describe what the tool does for the LLM."
+    requires_permission = True          # False → won't ask for permission
     parameters_schema   = {
         "type": "object",
         "properties": {
-            "parametre": {
+            "parameter": {
                 "type":        "string",
-                "description": "Parametrenin açıklaması"
+                "description": "Description of the parameter"
             }
         },
-        "required": ["parametre"]
+        "required": ["parameter"]
     }
 
     def run(self, params: dict) -> str:
-        # Donanımı burada çağır
-        # Ham veri (görüntü, binary) burada işle
-        # LLM'e sadece string döndür
-        return "Sensor değeri: 42"
+        # Call hardware here
+        # Process raw data (image, binary) here
+        # Return only strings to the LLM
+        return "Sensor value: 42"
 ```
 
-`main.py` içinde register et:
+Register it in `main.py`:
 
 ```python
-from tools.yeni_sensor import YeniSensorTool
-dispatcher.register(YeniSensorTool())
+from tools.new_sensor import NewSensorTool
+dispatcher.register(NewSensorTool())
 ```
 
-## İzin Sistemi
+## Permission System
 
-| Değer   | Davranış                      |
-| ------- | ----------------------------- |
-| `allow` | Her zaman izin ver            |
-| `ask`   | Her seferinde kullanıcıya sor |
-| `deny`  | Her zaman reddet              |
+| Value   | Behavior               |
+| ------- | ---------------------- |
+| `allow` | Always allow           |
+| `ask`   | Ask the user each time |
+| `deny`  | Always deny            |
 
-Runtime'da değiştirmek için:
+To change permissions at runtime, send a command like:
 
 ```
-Sen: bundan sonra ağ taraması için izin isteme
+You: don't ask for network scans anymore
 ```
 
-Agent bunu `permission_manager.set("scan_network", Permission.ALLOW)` şeklinde çalıştıracak. (Faz 2'de eklenecek)
+The agent will call `permission_manager.set("scan_network", Permission.ALLOW)` to apply the change.
 
-## Proje Yapısı
+## Project Structure
 
 ```
 Prime/
 ├── main.py
 ├── requirements.txt
 ├── core/
-│   ├── agent.py        # ReAct döngüsü, LLM bağlantısı
-│   ├── dispatcher.py   # Tool yönetimi
-│   ├── permission.py   # İzin sistemi
-│   └── tool.py         # Base Tool sınıfı
+│   ├── agent.py        # ReAct loop, LLM integration
+  │   ├── dispatcher.py   # Tool management
+  │   ├── permission.py   # Permission system
+  │   └── tool.py         # Base Tool class
 └── tools/
     └── example_tools.py
 ```

@@ -4,47 +4,47 @@ from core.dispatcher import ToolDispatcher
 from core.permission import PermissionManager, Permission
 from tools.example_tools import GetTimeTool, ScanNetworkTool
 
-# .env dosyasından okumak istersen:
+# If you want to read from a .env file:
 # from dotenv import load_dotenv; load_dotenv()
 
 
 def build_agent() -> AgentCore:
 
-    # 1. İzin yöneticisi — varsayılan izinleri burada tanımla
+    # 1. Permission manager — define default permissions here
     permissions = PermissionManager(defaults={
-        "get_time":     Permission.ALLOW,   # Saat sormak için izin gerekmez
-        "scan_network": Permission.ASK,     # Her seferinde sor
+        "get_time":     Permission.ALLOW,   # No permission needed to ask time
+        "scan_network": Permission.ASK,     # Ask each time
     })
 
     # 2. Dispatcher
     dispatcher = ToolDispatcher(permissions)
     dispatcher.register(GetTimeTool())
     dispatcher.register(ScanNetworkTool())
-    # Yeni tool → dispatcher.register(YeniTool())
+    # New tool → dispatcher.register(NewTool())
 
     # 3. Agent
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
-        raise ValueError("ANTHROPIC_API_KEY environment variable'ı set edilmemiş.")
+        raise ValueError("ANTHROPIC_API_KEY environment variable is not set.")
 
     return AgentCore(dispatcher, api_key)
 
 
 def main():
-    print("Prime başlatılıyor...\n")
+    print("Starting Prime...\n")
     agent = build_agent()
-    print("\nHazır. Çıkmak için 'q' yaz.\n")
+    print("\nReady. Type 'q' to quit.\n")
 
     while True:
         try:
-            user_input = input("Sen: ").strip()
+            user_input = input("You: ").strip()
 
             if not user_input:
                 continue
             if user_input.lower() == "q":
-                print("Prime kapatılıyor.")
+                print("Shutting down Prime.")
                 break
-            if user_input.lower() == "belleği temizle":
+            if user_input.lower() == "clear memory":
                 agent.clear_memory()
                 continue
 
@@ -52,7 +52,7 @@ def main():
             print(f"\nPrime: {response}\n")
 
         except KeyboardInterrupt:
-            print("\nPrime kapatılıyor.")
+            print("\nShutting down Prime.")
             break
 
 

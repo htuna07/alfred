@@ -14,13 +14,13 @@ class Tool(ABC):
     @abstractmethod
     def run(self, params: dict) -> str:
         """
-        Tool'u çalıştırır.
-        Her zaman string döner — ham veri (görüntü, binary) asla buradan çıkmaz.
+        Runs the tool.
+        Always returns a string — raw data (image, binary) should never be returned from here.
         """
         raise NotImplementedError
 
     def to_api_schema(self) -> dict:
-        """Claude function calling API formatına çevirir."""
+        """Convert to Claude function calling API format."""
         return {
             "name": self.name,
             "description": self.description,

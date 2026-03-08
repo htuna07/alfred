@@ -4,14 +4,14 @@ from core.dispatcher import ToolDispatcher
 MODEL   = "claude-haiku-4-5"
 MAX_TOKENS = 1024
 
-SYSTEM_PROMPT = """Sen P.R.I.M.E'sin. Raspberry Pi üzerinde çalışan, fiziksel dünyayla etkileşime girebilen kişisel bir asistansın.
+SYSTEM_PROMPT = """You are P.R.I.M.E. A personal assistant running on a Raspberry Pi that can interact with the physical world.
 
-Kurallar:
-- Türkçe konuş, kısa ve net ol.
-- Tool kullanman gerekiyorsa direkt kullan, gereksiz açıklama yapma.
-- Birden fazla tool gerekiyorsa aynı anda çağır.
-- Tool sonuçlarına dayanarak cevap ver, tahmin yürütme.
-- Yapamayacağın bir şey istenirse dürüstçe söyle."""
+Rules:
+- Speak in English, be short and concise.
+- If you need to use tools, call them directly and avoid unnecessary explanation.
+- If multiple tools are needed, call them together.
+- Base your answers on tool results; do not speculate.
+- If asked to do something you cannot, say so honestly."""
 
 
 class AgentCore:
@@ -34,16 +34,16 @@ class AgentCore:
             )
 
             # ------------------------------------------------
-            # Durum 1: LLM tool çağırdı
+            # Case 1: LLM called a tool
             # ------------------------------------------------
             if response.stop_reason == "tool_use":
                 tool_calls   = [b for b in response.content if b.type == "tool_use"]
                 tool_results = []
 
                 for call in tool_calls:
-                    print(f"[tool çağrısı] {call.name} → {call.input}")
+                    print(f"[tool call] {call.name} → {call.input}")
                     result = self._dispatcher.run(call.name, call.input)
-                    print(f"[tool sonucu] {result}")
+                    print(f"[tool result] {result}")
 
                     tool_results.append({
                         "type":        "tool_result",
@@ -51,14 +51,14 @@ class AgentCore:
                         "content":     result
                     })
 
-                # Assistant mesajı ve tool result'ları memory'e ekle
+                # Add assistant message and tool results to memory
                 self._memory.append({"role": "assistant", "content": response.content})
                 self._memory.append({"role": "user",      "content": tool_results})
 
-                # Döngü devam eder
+                # Loop continues
 
             # ------------------------------------------------
-            # Durum 2: Direkt cevap, döngü biter
+            # Case 2: Direct response, end loop
             # ------------------------------------------------
             else:
                 final = next(b.text for b in response.content if hasattr(b, "text"))
@@ -67,4 +67,4 @@ class AgentCore:
 
     def clear_memory(self):
         self._memory = []
-        print("[bellek] Konuşma geçmişi temizlendi.")
+        print("[memory] Conversation history cleared.")

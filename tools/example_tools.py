@@ -4,9 +4,9 @@ from core.tool import Tool
 
 
 class GetTimeTool(Tool):
-    """İzin gerektirmeyen basit tool örneği."""
+    """Simple tool example that does not require permission."""
     name                = "get_time"
-    description         = "Şu anki tarih ve saati döner."
+    description         = "Returns the current date and time."
     requires_permission = False
     parameters_schema   = {
         "type": "object",
@@ -20,16 +20,16 @@ class GetTimeTool(Tool):
 
 
 class ScanNetworkTool(Tool):
-    """Ağa bağlı cihazları tarar. İzin gerektirir."""
+    """Scans devices on the network. Requires permission."""
     name                = "scan_network"
-    description         = "Yerel ağa bağlı cihazları tarar, IP ve MAC adreslerini döner."
+    description         = "Scans the local network for devices, returns IP and MAC addresses."
     requires_permission = True
     parameters_schema   = {
         "type": "object",
         "properties": {
             "subnet": {
                 "type":        "string",
-                "description": "Taranacak subnet, örn: 192.168.1.0/24"
+                "description": "Subnet to scan, e.g.: 192.168.1.0/24"
             }
         },
         "required": ["subnet"]
@@ -39,19 +39,19 @@ class ScanNetworkTool(Tool):
         subnet = params.get("subnet", "192.168.1.0/24")
 
         try:
-            # nmap kurulu olmalı: sudo apt install nmap
+            # nmap must be installed: sudo apt install nmap
             result = subprocess.run(
                 ["nmap", "-sn", subnet],
                 capture_output=True,
                 text=True,
                 timeout=30
             )
-            # Ham nmap çıktısını sadeleştir, LLM'e gönder
+            # Simplify raw nmap output, send to LLM
             lines    = result.stdout.splitlines()
             devices  = [l for l in lines if "Nmap scan" in l or "MAC" in l or "report" in l]
-            return "\n".join(devices) if devices else "Cihaz bulunamadı."
+            return "\n".join(devices) if devices else "No devices found."
 
         except FileNotFoundError:
-            return "[hata] nmap kurulu değil. 'sudo apt install nmap' ile kur."
+            return "[error] nmap is not installed. Install with 'sudo apt install nmap'."
         except subprocess.TimeoutExpired:
-            return "[hata] Tarama zaman aşımına uğradı."
+            return "[error] Scan timed out."
