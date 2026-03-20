@@ -1,4 +1,4 @@
-# P.R.I.M.E (Pi Robotic Intelligence & Monitoring Engine)
+# A.L.F.R.E.D.( A Little Friendly Robot for Everday Duties )
 
 A personal agent designed to run on a Raspberry Pi.
 
