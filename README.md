@@ -1,4 +1,4 @@
-# A.L.F.R.E.D.(A Little Friendly Robot for Everday Duties)
+# A.L.F.R.E.D.(A Little Friendly Robot for Everyday Duties)
 
 A personal agent designed to run on a Raspberry Pi.
 
